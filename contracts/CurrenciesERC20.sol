@@ -2,15 +2,15 @@
 pragma solidity ^0.8.0;
 
 //import "../../../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../../node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "./../node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 //import "../../../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../../../node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./../node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol";
 //import "../../../node_modules/@openzeppelin/contracts/utils/Context.sol";
-import "../../../node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./../node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol";
 //import "../../../node_modules/@openzeppelin/contracts/utils/Counters.sol";
-import "../../../node_modules/@openzeppelin/contracts/access/Ownable.sol";
-import './interfaces/ICurrenciesERC20.sol';
-import "../../../node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "./../node_modules/@openzeppelin/contracts/access/Ownable.sol";
+import "./interfaces/ICurrenciesERC20.sol";
+import "./../node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 /**
  *      CurrenciesERC20
@@ -53,7 +53,6 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
     // mapping from name to currency contract defined by users (not protected against scum)
     mapping(string => CurrencyERC20_Custom) public _currencies_custom_user;
 
-    
     bytes4 private _INTERFACE_ID_CURRECIES = 0x033a36bd;
 
     function AddCustomCurrency(address _token_contract) public {
@@ -126,8 +125,13 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
     }
 
     function supportsInterface(bytes4 interfaceId)
-    public view override
-    returns (bool) {
-       return interfaceId == type(ICurrenciesERC20).interfaceId || super.supportsInterface(interfaceId);
+        public
+        view
+        override
+        returns (bool)
+    {
+        return
+            interfaceId == type(ICurrenciesERC20).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 }
