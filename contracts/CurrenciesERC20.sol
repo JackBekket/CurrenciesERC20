@@ -192,6 +192,19 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
     }
 */
 
+    /**
+    *   Calculate fee (UnSafeMath) -- use it only if it ^0.8.0
+    *   @param amount number from whom we take fee
+    *   @param scale scale for rounding. 100 is 1/100 (percent). we can encreace scale if we want better division (like we need to take 0.5% instead of 5%, then scale = 1000)
+    */
+    function calculateFee(uint256 amount, uint256 scale) internal view returns (uint256) {
+        uint a = amount / scale;
+        uint b = amount % scale;
+        uint c = promille_fee / scale;
+        uint d = promille_fee % scale;
+        return a * c * scale + a * d + b * c + (b * d + scale - 1) / scale;
+    }
+
     function supportsInterface(bytes4 interfaceId)
         public
         view
