@@ -61,6 +61,9 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
 
     bytes4 private _INTERFACE_ID_CURRENCIES = 0x033a36bd;
 
+    /// @dev interface of method_id for token transfer function (ERC20 standard)
+    bytes4 public _INTEFACE_ID_TRANSFER_ERC20 = 0xa9059cbb;
+
     // doesn't work with tether
     function AddCustomCurrency(address _token_contract) public {
         IERC20Metadata _currency_contract = IERC20Metadata(_token_contract);
@@ -172,8 +175,22 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
         return _currencies_by_address[currency_contract];
     }
 
-    
 
+// TODO: add check that function call is a transfer
+ /*
+    /// @notice Explain to an end user what this does
+    /// @dev Explain to a developer any extra details
+    /// @param data data of transaction (calldata)
+    /// @return Documents the return variables of a contract’s function state variable
+    function isTransfer(bytes calldata data) public returns (bool)
+    {
+        bytes calldata method_id = data[4:];
+        if(method_id == _INTEFACE_ID_TRANSFER_ERC20)
+         {
+            return true;
+         }
+    }
+*/
 
     function supportsInterface(bytes4 interfaceId)
         public
