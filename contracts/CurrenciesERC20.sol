@@ -44,7 +44,7 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
         IERC20Metadata itoken; // contract interface
     }
 
-    // map currency contract addresses
+    // map from currency to contract
     mapping(CurrencyERC20 => IERC20Metadata) public _currencies_hardcoded; // should be internal?
 
     // mapping from name to currency contract (protected)
@@ -53,8 +53,15 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
     // mapping from name to currency contract defined by users (not protected against scum)
     mapping(string => CurrencyERC20_Custom) public _currencies_custom_user;
 
-    bytes4 private _INTERFACE_ID_CURRECIES = 0x033a36bd;
+    // mapping from currency contract address to flag
+    mapping(address => bool) public isCurrency;
 
+    // mapping from address to currency
+    mapping(address => IERC20Metadata) public _currencies_by_address;
+
+    bytes4 private _INTERFACE_ID_CURRENCIES = 0x033a36bd;
+
+    // doesn't work with tether
     function AddCustomCurrency(address _token_contract) public {
         IERC20Metadata _currency_contract = IERC20Metadata(_token_contract);
 
@@ -81,6 +88,10 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
             //  _currencies_custom_user[_name_c].decimals = _dec;
             _currencies_custom_user[_name_c].contract_address = _token_contract;
         }
+
+        isCurrency[_token_contract] = true;
+        _currencies_by_address[_token_contract] = _currency_contract;
+
     }
 
     constructor(
@@ -102,12 +113,28 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
         require(WBTC != address(0), "WBTC contract address is zero!");
 
         _currencies_hardcoded[CurrencyERC20.USDT] = IERC20Metadata(US_Tether);
-        _currencies_hardcoded[CurrencyERC20.USDT] == IERC20Metadata(US_Tether);
+        _currencies_hardcoded[CurrencyERC20.USDT] == IERC20Metadata(US_Tether); // ?
         _currencies_hardcoded[CurrencyERC20.USDC] = IERC20Metadata(US_Circle);
         _currencies_hardcoded[CurrencyERC20.DAI] = IERC20Metadata(DAI);
         _currencies_hardcoded[CurrencyERC20.WETH] = IERC20Metadata(W_Ethereum);
         _currencies_hardcoded[CurrencyERC20.MST] = IERC20Metadata(MST);
         _currencies_hardcoded[CurrencyERC20.WBTC] = IERC20Metadata(WBTC);
+
+        isCurrency[US_Tether] = true;
+        isCurrency[US_Circle] = true;
+        isCurrency[DAI] = true;
+        isCurrency[W_Ethereum] = true;
+       // isCurrency[MST] = true;
+        isCurrency[WBTC] = true;
+
+        _currencies_by_address[US_Tether] = _currencies_hardcoded[CurrencyERC20.USDT];
+        _currencies_by_address[US_Circle] = _currencies_hardcoded[CurrencyERC20.USDC];
+        _currencies_by_address[DAI] = _currencies_hardcoded[CurrencyERC20.DAI];
+    //    _currencies_by_address[MST] = _currencies_hardcoded[CurrencyERC20.MST];
+        _currencies_by_address[W_Ethereum] = _currencies_hardcoded[CurrencyERC20.WETH];
+        _currencies_by_address[WBTC] = _currencies_hardcoded[CurrencyERC20.WBTC];
+
+
 
         // AddCustomCurrency(US_Tether);
         // AddCustomCurrency(US_Circle);
@@ -123,6 +150,30 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
     {
         return _currencies_hardcoded[currency];
     }
+
+    /// @notice Explain to an end user what this does
+    /// @dev Explain to a developer any extra details
+    /// @param _contract contract address of a currency
+    /// @return Documents the return variables of a contract’s function state variable
+    // @inheritdoc	Copies all missing tags from the base function (must be followed by the contract name)
+    function checkCurrenciesBool(address _contract) public view returns (bool)
+    {
+        return isCurrency[_contract];
+    }
+
+    /// @notice Explain to an end user what this does
+    /// @dev Explain to a developer any extra details
+    /// @param currency_contract address of a currency contract
+    /// @return Documents the return variables of a contract’s function state variable
+    // @inheritdoc	Copies all missing tags from the base function (must be followed by the contract name)
+    function getCurrencyByAddress(address currency_contract) public view returns (IERC20Metadata)
+    {
+        require(isCurrency[currency_contract] == true,"this address is not a currency");
+        return _currencies_by_address[currency_contract];
+    }
+
+    
+
 
     function supportsInterface(bytes4 interfaceId)
         public
