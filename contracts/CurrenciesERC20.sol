@@ -64,6 +64,10 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
     /// @dev interface of method_id for token transfer function (ERC20 standard)
     bytes4 public _INTEFACE_ID_TRANSFER_ERC20 = 0xa9059cbb;
 
+    /// @dev global fee variable
+    uint public g_fee;
+    uint public g_scale;
+
     // doesn't work with tether
     function AddCustomCurrency(address _token_contract) public {
         IERC20Metadata _currency_contract = IERC20Metadata(_token_contract);
@@ -144,6 +148,9 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
         // AddCustomCurrency(DAI);
         // AddCustomCurrency(W_Ethereum);
         AddCustomCurrency(MST);
+
+        g_fee = 5;
+        g_scale = 100;
     }
 
     function get_hardcoded_currency(CurrencyERC20 currency)
@@ -196,14 +203,17 @@ contract CurrenciesERC20 is ReentrancyGuard, Ownable, ERC165 {
     *   Calculate fee (UnSafeMath) -- use it only if it ^0.8.0
     *   @param amount number from whom we take fee
     *   @param scale scale for rounding. 100 is 1/100 (percent). we can encreace scale if we want better division (like we need to take 0.5% instead of 5%, then scale = 1000)
+    *   @param fee is fee. if fee = 5 and scale = 100 then we take 5%. If fee = 15 and scale = 1000 then fee = 1.5% and so on
     */
-    function calculateFee(uint256 amount, uint256 scale) internal view returns (uint256) {
+    function calculateFee(uint256 amount, uint256 scale, uint fee) internal pure returns (uint256) {
         uint a = amount / scale;
         uint b = amount % scale;
-        uint c = promille_fee / scale;
-        uint d = promille_fee % scale;
+        uint c = fee / scale;
+        uint d = fee % scale;
         return a * c * scale + a * d + b * c + (b * d + scale - 1) / scale;
     }
+
+    
 
     function supportsInterface(bytes4 interfaceId)
         public
